@@ -25,11 +25,13 @@ class RedirectHandler(HTTPRedirectHandler):
 
         return nreq
 
+    # Оставил, возможно потребуется
     def http_error_301(self, req, res, code, msg, hdrs):
         # Let parent handle the rest
         return HTTPRedirectHandler.http_error_301(
             self, req, res, code, msg, hdrs)
 
+    # Оставил, возможно потребуется
     def http_error_302(self, req, res, code, msg, hdrs):
         # Let parent handle the rest
         return HTTPRedirectHandler.http_error_302(
