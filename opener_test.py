@@ -10,6 +10,9 @@ if __name__ == '__main__':
     urls = (
         'https://docs.python.org/3.8/library/tkinter.html',
         'https://bagaznik-darom.ru/',
+        'http://www.fish.customweb.ru/robots.txt',
+        'http://fish.customweb.ru/',
+        #'https://www.dns-shop.ru/robots.txt',
         'http://lanatula.ru/about/',
         'http://www.lanatula.ru/about/',
         'http://lanatula.ru/about1/',

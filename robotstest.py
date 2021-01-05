@@ -2,12 +2,18 @@ from urllib import robotparser
 from urllib import parse
 
 
-url_base = "https://bagaznik-darom.ru/"
+#url_base = "https://bagaznik-darom.ru/"
+url_base = "http://www.fish.customweb.ru/"
+#url_base = "https://www.dns-shop.ru/"
+#url_base = 'https://www.onlinetrade.ru/'
 USER_AGENT = '*'
 
 PARTS = [
     '/',
-    '/avtoboksi/',
+    '/admin/?menu=catalog',
+    '/admin/',
+    '/docs/',
+    '/preorder/',
     '/catalog/boks_lux_irbis_175_seriy_matoviy_450l_s_dvustor_otkr_1750h850h400_art_790951',
     'boks_lux_irbis_175_seriy_matoviy_450l_s_dvustor_otkr_1750h850h400_art_790951',
     '/avtoboksi/?set=page',
@@ -19,6 +25,7 @@ parser = robotparser.RobotFileParser()
 parser.set_url(parse.urljoin(url_base, 'robots.txt'))
 parser.read()
 
+
 for path in PARTS:
     print('{!r:>6} : {}'.format(
         parser.can_fetch(USER_AGENT, path), path
@@ -29,6 +36,7 @@ for path in PARTS:
     print('{!r:>6} : {}'.format(
         parser.can_fetch(USER_AGENT, url), url
     ))
+    print('-' * 25)
 
 # Sets the time the robots.txt file was last fetched to the current time.
 print('\nметод modified()')
@@ -53,5 +61,4 @@ try:
 except AttributeError:
     print('Нет такого')
 
-
-print('\n',parser)
+print(parser)
