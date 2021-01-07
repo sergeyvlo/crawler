@@ -3,8 +3,6 @@ from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
 
 from .request_handlers import RedirectHandler
-from .idna import idna_encode
-
 from urlopener import openerconfig
 
 
@@ -14,6 +12,7 @@ class Urlopener:
         self.timeout = timeout
         self.encoding = encoding
         self.mime_type = None
+        self.res = None
 
         self.redirect_handler = RedirectHandler()
 
@@ -28,15 +27,15 @@ class Urlopener:
 
     def urlopen(self, url):
         response = {'response': None, 'redirect': None, 'error': None}
-        url = idna_encode(url)  # Для открытия международных доменов
 
         req = Request(url)
 
         try:
-            res = self.opener.open(req, timeout=self.timeout)
-            response['response'], response['redirect'] = self.make_response(res, url)
+            self.res = self.opener.open(req, timeout=self.timeout)
+            response['response'], response['redirect'] = self.make_response(self.res, url)
         except HTTPError as e:
             response['error'] = {'url': url, 'code': e.code, 'msg': str(e)}
+            r, response['redirect'] = self.make_response(self.res, url)
 
         except URLError as e:  # Ошибки URL
             response['error'] = {'url': url, 'code': e.errno, 'msg': e.reason}

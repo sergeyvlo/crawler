@@ -27,5 +27,10 @@ MIME_TYPES = ('text/html', 'text/plain', 'application/json')
 BASIC_AUTH = (('http://demo.customweb.ru/', 'admin', '12345'),
              ('http://demo2.customweb.ru', 'admin', 'admin'))
 
+# robots.txt
+"""Выбираться будет из базы или ini файла"""
+USE_ROBOTS = False
+USE_SITE_MAP = False
+USER_AGENT = '*'
 
 

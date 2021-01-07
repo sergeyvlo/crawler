@@ -1,5 +1,9 @@
 from urlopener import Urlopener, openerconfig
 from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler
+from urlopener.idna import idna_encode
+from urlopener.robots import Robots
+from urllib.error import URLError, HTTPError
+from http.client import InvalidURL
 
 
 # from urlopener import *
@@ -11,6 +15,7 @@ if __name__ == '__main__':
         'https://docs.python.org/3.8/library/tkinter.html',
         'https://bagaznik-darom.ru/',
         'http://www.fish.customweb.ru/robots.txt',
+        'http://www.fish.customweb.ru/admin/',
         'http://fish.customweb.ru/',
         #'https://www.dns-shop.ru/robots.txt',
         'http://lanatula.ru/about/',
@@ -28,7 +33,9 @@ if __name__ == '__main__':
         'http://demo.customweb.ru/we/wecannot/',
         'http://demo2.customweb.ru/',
         'http://demo20.customweb.ru/',
-       # 'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/1'
+        'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/ddd/',
+        'https://www.dns-shop.ru/',
+        'http://fish.customweb.ru/',
         'https://юзерагент.рф/',
         'https://русские-домены.рф/'
     )
@@ -45,14 +52,47 @@ if __name__ == '__main__':
     agent = UserAgentHandler(openerconfig.agents[2])
     rec.add_handler(agent)
 
+    bad_robot = None
+
     for url in urls:
-        response = rec.urlopen(url)
+        # Для открытия международных доменов
+        url = idna_encode(url)
+
+        # Использовать robots.txt
+        if openerconfig.USE_ROBOTS:
+            parser = Robots()
+            parser.make_robots(url)
+
+            # Возможно прочитать robots.txt
+            try:
+                parser.read()
+            # Неудается прочитать robots.txt
+            except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError):
+                pass
+
+        # Проверка доступа к URL в robots.txt
+        if openerconfig.USE_ROBOTS:
+            flag_url = parser.can_fetch(openerconfig.USER_AGENT, url)
+        else:
+            flag_url = True
+
+        if flag_url:
+            response = rec.urlopen(url)
+        else:
+            bad_robot = ('URL закрыт', url)
+
 
         if response['redirect'] is not None:
             print(response['redirect'])
+            response['redirect'] = None
         if response['response'] is not None:
             print(response['response']['code'], response['response']['url'], response['response']['msg'])
+            response['response'] = None
         if response['error'] is not None:
             print(response['error'])
+            response['error'] = None
+        if bad_robot is not None:
+            print(bad_robot)
+            bad_robot = None
 
-        print('/n----------')
+        print('----------')

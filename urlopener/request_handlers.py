@@ -1,11 +1,13 @@
 from urllib.request import BaseHandler, HTTPRedirectHandler, \
     HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
+import collections
 
 
 class RedirectHandler(HTTPRedirectHandler):
 
     def __init__(self):
         self.redirect_hdrs = []
+        self.counter = collections.Counter()
 
     def get_redirect(self):
         if len(self.redirect_hdrs) > 0:
@@ -15,6 +17,7 @@ class RedirectHandler(HTTPRedirectHandler):
 
     def clear_redirect(self):
         self.redirect_hdrs = []
+        self.counter.clear()
 
     def redirect_request(self, req, res, code, msg, hdrs, newurl):
         response = {'url': req.get_full_url(), 'headers': res.headers, 'code': code, 'msg': msg, 'new_url': newurl}
@@ -37,6 +40,12 @@ class RedirectHandler(HTTPRedirectHandler):
         return HTTPRedirectHandler.http_error_302(
             self, req, res, code, msg, hdrs)
 
+    def http_error_307(self, req, res, code, msg, hdrs):
+        self.counter['307'] += 1
+
+        if self.counter['307'] <= 1:
+            return HTTPRedirectHandler.http_error_307(
+                self, req, res, code, msg, hdrs)
 
 class UserAgentHandler(BaseHandler):
     # Handler добавляющий user-agent

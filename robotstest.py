@@ -1,17 +1,21 @@
 from urllib import robotparser
 from urllib import parse
 
+from urlopener.idna import idna_encode
+
 
 #url_base = "https://bagaznik-darom.ru/"
 url_base = "http://www.fish.customweb.ru/"
 #url_base = "https://www.dns-shop.ru/"
 #url_base = 'https://www.onlinetrade.ru/'
+#url_base = 'https://юзерагент.рф/'
+
 USER_AGENT = '*'
 
 PARTS = [
     '/',
     '/admin/?menu=catalog',
-    '/admin/',
+    'http://www.fish.customweb.ru/admin/',
     '/docs/',
     '/preorder/',
     '/catalog/boks_lux_irbis_175_seriy_matoviy_450l_s_dvustor_otkr_1750h850h400_art_790951',
@@ -22,7 +26,7 @@ PARTS = [
 ]
 
 parser = robotparser.RobotFileParser()
-parser.set_url(parse.urljoin(url_base, 'robots.txt'))
+parser.set_url(parse.urljoin(idna_encode(url_base), 'robots.txt'))
 parser.read()
 
 
