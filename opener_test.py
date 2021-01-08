@@ -61,7 +61,7 @@ if __name__ == '__main__':
         # Использовать robots.txt
         if openerconfig.USE_ROBOTS:
             parser = Robots()
-            parser.make_robots(url)
+            parser.set_url_ext(url)
 
             # Возможно прочитать robots.txt
             try:
