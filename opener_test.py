@@ -1,5 +1,5 @@
 from urlopener import Urlopener, openerconfig
-from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler
+from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler, CookiejarHandler
 from urlopener.idna import idna_encode
 from urlopener.robots import Robots
 from urllib.error import URLError, HTTPError
@@ -13,13 +13,16 @@ if __name__ == '__main__':
 
     urls = (
         #'https://docs.python.org/3.8/library/tkinter.html',
-        'https://www.dns-shop.ru/',
+        'https://www.dns-shop.ru/robots.txt',
+        'https://www.dns-shop.ru/catalog/17a8e9b716404e77/bytovaya-texnika/',
+        'https://www.dns-shop.ru/catalog/17a890dc16404e77/smartfony-planshety-i-fototexnika/',
         'https://bagaznik-darom.ru/',
         'http://www.fish.customweb.ru/robots.txt',
-        'http://www.fish.customweb.ru/admin/',
+        'http://www.fish.customweb.ru/',
         'http://fish.customweb.ru/',
-        #'https://www.dns-shop.ru/robots.txt',
-        'http://lanatula.ru/about/',
+        'https://www.dns-shop.ru/robots.txt',
+        'http://lanatula.ru/',
+        'http://lanatula.ru/admin/',
         'http://www.lanatula.ru/about/',
         'http://lanatula.ru/about1/',
         'http://192.168.1.93/phpinfo.php',
@@ -35,11 +38,12 @@ if __name__ == '__main__':
         'http://demo2.customweb.ru/',
         'http://demo20.customweb.ru/',
         'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/ddd/',
-        'http://fish.customweb.ru/',
+        'http://fish.customweb.ru/admin/',
         'https://юзерагент.рф/',
         'https://русские-домены.рф/'
     )
 
+    # Создание URL открывалки
     rec = Urlopener()
 
     # Базовая идентификация
@@ -51,6 +55,10 @@ if __name__ == '__main__':
     # USER-AGENT
     agent = UserAgentHandler(openerconfig.agents[2])
     rec.add_handler(agent)
+
+    # cookies
+    if openerconfig.COOKIES:
+        rec.add_cookie_handler()
 
     bad_robot = None
 
@@ -77,22 +85,32 @@ if __name__ == '__main__':
             flag_url = True
 
         if flag_url:
-            response = rec.urlopen(url)
+            response = rec.urlopen(url)     # Открыть URL
         else:
             bad_robot = ('URL закрыт', url)
 
+        if openerconfig.COOKIES:
+            #print(rec.cookie_handler.make_cookies(response, rec))
+            pass
+
+        if openerconfig.COOKIES:
+            print(response['cookie'])
+
+        #print(response)
 
         if response['redirect'] is not None:
             print(response['redirect'])
-            response['redirect'] = None
+
         if response['response'] is not None:
             print(response['response']['code'], response['response']['url'], response['response']['msg'])
-            response['response'] = None
+
         if response['error'] is not None:
             print(response['error'])
-            response['error'] = None
+
         if bad_robot is not None:
             print(bad_robot)
             bad_robot = None
 
+
+        response = None
         print('----------')

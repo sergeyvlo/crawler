@@ -6,6 +6,8 @@
 from urllib.robotparser import RobotFileParser
 from urllib.request import urlopen
 from urllib import parse
+from urllib.error import URLError, HTTPError
+from http.client import InvalidURL
 
 from .utils import get_base_url
 
@@ -47,3 +49,4 @@ class Robots(RobotFileParser):
 
         except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError):
             self.maps = dict()
+            self.maps_list = []

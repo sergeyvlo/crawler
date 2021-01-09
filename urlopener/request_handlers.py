@@ -1,11 +1,13 @@
 from urllib.request import BaseHandler, HTTPRedirectHandler, \
-    HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
+    HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm, HTTPCookieProcessor
+from http.cookiejar import CookieJar, DefaultCookiePolicy
 import collections
 
 
 class RedirectHandler(HTTPRedirectHandler):
 
     def __init__(self):
+        HTTPRedirectHandler.__init__(self)
         self.redirect_hdrs = []
         self.counter = collections.Counter()
 
@@ -40,13 +42,18 @@ class RedirectHandler(HTTPRedirectHandler):
         return HTTPRedirectHandler.http_error_302(
             self, req, res, code, msg, hdrs)
 
-    def http_error_307(self, req, res, code, msg, hdrs):
-        self.counter['307'] += 1
+    def http_error_303(self, req, res, code, msg, hdrs):
+        # Let parent handle the rest
+        return HTTPRedirectHandler.http_error_303(
+            self, req, res, code, msg, hdrs)
 
+    def http_error_307(self, req, res, code, msg, hdrs):
+        return None
+        self.counter['307'] += 1
         if self.counter['307'] <= 1:
-            return HTTPRedirectHandler.http_error_307(
-                self, req, res, code, msg, hdrs)
-            #return None
+            #return HTTPRedirectHandler.http_error_307(
+            #    self, req, res, code, msg, hdrs)
+            return None
 
 class UserAgentHandler(BaseHandler):
     # Handler добавляющий user-agent
@@ -62,6 +69,7 @@ class UserAgentHandler(BaseHandler):
 
 
 class AuthorizationHandler:
+
     def __init__(self):
         self.password_mgr = HTTPPasswordMgrWithDefaultRealm()
 
@@ -71,3 +79,23 @@ class AuthorizationHandler:
 
     def add_auth_data(self, top_level_url, user, passwd):
         self.password_mgr.add_password(None, top_level_url, user, passwd)
+
+
+class CookiejarHandler:
+
+    def __init__(self):
+        self.cj = None
+
+    def cookiejar(self):
+        policy = DefaultCookiePolicy(
+            rfc2965=True, strict_ns_domain=DefaultCookiePolicy.DomainStrict)
+        self.cj = CookieJar(policy)
+        handler = HTTPCookieProcessor(self.cj)
+        return handler
+
+    def make_cookies(self, response, request):
+        cook = self.cj.make_cookies(response, request)
+        return cook
+
+    def clear_cookies(self):
+        self.cj.clear()

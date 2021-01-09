@@ -2,7 +2,7 @@ from urllib.request import build_opener, Request
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
 
-from .request_handlers import RedirectHandler
+from .request_handlers import RedirectHandler, CookiejarHandler
 from urlopener import openerconfig
 
 
@@ -11,10 +11,12 @@ class Urlopener:
     def __init__(self, encoding=openerconfig.ENCODING, timeout=None):
         self.timeout = timeout
         self.encoding = encoding
+
         self.mime_type = None
         self.res = None
 
         self.redirect_handler = RedirectHandler()
+        self.cookie_handler = None
 
         # Создать открывалку
         self.opener = build_opener(self.redirect_handler)
@@ -25,21 +27,30 @@ class Urlopener:
         """Метод добавляет обработчик"""
         self.opener.add_handler(handler)
 
+    def add_cookie_handler(self):
+        """Метод добавляет обработчик Cookie"""
+        self.cookie_handler = CookiejarHandler()
+        self.opener.add_handler(self.cookie_handler.cookiejar())
+
     def add_headers(self, headers):
         self.opener.addheaders = headers
 
     def urlopen(self, url):
-        response = {'response': None, 'redirect': None, 'error': None}
+        self.redirect_handler.clear_redirect()
+        response = {'response': None, 'redirect': None, 'error': None, 'cookie': None}
 
         req = Request(url)
 
         try:
             self.res = self.opener.open(req, timeout=self.timeout)
             response['response'], response['redirect'] = self.make_response(self.res, url)
+            if self.cookie_handler is not None:
+                response['cookie'] = self.cookie_handler.make_cookies(self.res, req)
+
         except HTTPError as e:
             response['error'] = {'url': url, 'code': e.code, 'msg': str(e)}
-            if self.res is not None:
-                r, response['redirect'] = self.make_response(self.res, url)
+            #if self.res is not None:
+            #    r, response['redirect'] = self.make_response(self.res, url)
 
         except URLError as e:  # Ошибки URL
             response['error'] = {'url': url, 'code': e.errno, 'msg': e.reason}

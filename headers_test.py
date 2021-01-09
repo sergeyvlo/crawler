@@ -4,7 +4,7 @@ from urlopener import Urlopener, openerconfig
 if __name__ == '__main__':
     url = 'http://192.168.1.93/test_headers.php'
     url = 'https://www.dns-shop.ru/'
-    url = 'https://bagaznik-darom.ru/'
+    url = 'https://bagaznik-darom.ru/robots.txt'
 
     rec = Urlopener()
     #rec.add_headers([('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'),

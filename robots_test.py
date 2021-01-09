@@ -1,11 +1,13 @@
 from urlopener.robots import Robots
 from urlopener.idna import idna_encode
 from urllib import parse
+from urllib.error import URLError, HTTPError
+from http.client import InvalidURL
 
 
 #url_base = "https://bagaznik-darom.ru/"
 url_base = "http://www.fish.customweb.ru/"
-#url_base = "https://www.dns-shop.ru/"
+url_base = "https://www.dns-shop.ru/"
 #url_base = 'https://www.onlinetrade.ru/'
 #url_base = 'https://юзерагент.рф/'
 #url_base = 'http://lanatula.ru/'
@@ -29,8 +31,11 @@ url_base = idna_encode(url_base)
 parser = Robots()
 parser.set_url_ext(url_base)
 parser.site_maps_ext()
-parser.read()
-
+print(parser.maps)
+try:
+    parser.read()
+except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError):
+    pass
 
 
 for path in PARTS:
