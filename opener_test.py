@@ -12,7 +12,8 @@ from http.client import InvalidURL
 if __name__ == '__main__':
 
     urls = (
-        'https://docs.python.org/3.8/library/tkinter.html',
+        #'https://docs.python.org/3.8/library/tkinter.html',
+        'https://www.dns-shop.ru/',
         'https://bagaznik-darom.ru/',
         'http://www.fish.customweb.ru/robots.txt',
         'http://www.fish.customweb.ru/admin/',
@@ -34,7 +35,6 @@ if __name__ == '__main__':
         'http://demo2.customweb.ru/',
         'http://demo20.customweb.ru/',
         'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/ddd/',
-        'https://www.dns-shop.ru/',
         'http://fish.customweb.ru/',
         'https://юзерагент.рф/',
         'https://русские-домены.рф/'

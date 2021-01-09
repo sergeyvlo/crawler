@@ -25,6 +25,9 @@ class Urlopener:
         """Метод добавляет обработчик"""
         self.opener.add_handler(handler)
 
+    def add_headers(self, headers):
+        self.opener.addheaders = headers
+
     def urlopen(self, url):
         response = {'response': None, 'redirect': None, 'error': None}
 
@@ -35,7 +38,8 @@ class Urlopener:
             response['response'], response['redirect'] = self.make_response(self.res, url)
         except HTTPError as e:
             response['error'] = {'url': url, 'code': e.code, 'msg': str(e)}
-            r, response['redirect'] = self.make_response(self.res, url)
+            if self.res is not None:
+                r, response['redirect'] = self.make_response(self.res, url)
 
         except URLError as e:  # Ошибки URL
             response['error'] = {'url': url, 'code': e.errno, 'msg': e.reason}

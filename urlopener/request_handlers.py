@@ -46,6 +46,7 @@ class RedirectHandler(HTTPRedirectHandler):
         if self.counter['307'] <= 1:
             return HTTPRedirectHandler.http_error_307(
                 self, req, res, code, msg, hdrs)
+            #return None
 
 class UserAgentHandler(BaseHandler):
     # Handler добавляющий user-agent
