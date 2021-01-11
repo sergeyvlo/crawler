@@ -1,7 +1,8 @@
 from urllib.request import BaseHandler, HTTPRedirectHandler, \
     HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm, HTTPCookieProcessor
-from http.cookiejar import CookieJar, DefaultCookiePolicy
+from http.cookiejar import CookieJar, DefaultCookiePolicy, FileCookieJar, MozillaCookieJar
 import collections
+from os.path import exists
 
 
 class RedirectHandler(HTTPRedirectHandler):
@@ -48,12 +49,12 @@ class RedirectHandler(HTTPRedirectHandler):
             self, req, res, code, msg, hdrs)
 
     def http_error_307(self, req, res, code, msg, hdrs):
-        return None
+        #return None
         self.counter['307'] += 1
         if self.counter['307'] <= 1:
-            #return HTTPRedirectHandler.http_error_307(
-            #    self, req, res, code, msg, hdrs)
-            return None
+            return HTTPRedirectHandler.http_error_307(
+                self, req, res, code, msg, hdrs)
+
 
 class UserAgentHandler(BaseHandler):
     # Handler добавляющий user-agent
@@ -84,18 +85,47 @@ class AuthorizationHandler:
 class CookiejarHandler:
 
     def __init__(self):
-        self.cj = None
+        self.cookieJar = None
 
-    def cookiejar(self):
-        policy = DefaultCookiePolicy(
-            rfc2965=True, strict_ns_domain=DefaultCookiePolicy.DomainStrict)
-        self.cj = CookieJar(policy)
-        handler = HTTPCookieProcessor(self.cj)
+    def cookiejar(self, policy):
+        def_policy = DefaultCookiePolicy(**policy)
+
+        self.cookieJar = CookieJar(def_policy)
+
+        handler = HTTPCookieProcessor(self.cookieJar)
         return handler
 
     def make_cookies(self, response, request):
-        cook = self.cj.make_cookies(response, request)
+        cook = self.cookieJar.make_cookies(response, request)
         return cook
 
-    def clear_cookies(self):
-        self.cj.clear()
+    def clear_cookies(self, domain=None, path=None, name=None):
+        self.cookieJar.clear(domain, path, name)
+
+
+class MozillaCookiejarHandler:
+    """Загружает и сохраняет cookies в формате Mozilla"""
+
+    def __init__(self, filename='cookies.txt'):
+        self.mozillaCookieJar = None
+        self.filename = filename
+
+    def cookiejar(self, policy):
+        def_policy = DefaultCookiePolicy(**policy)
+
+        self.mozillaCookieJar = MozillaCookieJar(self.filename, def_policy)
+        if exists(self.filename):
+            self.mozillaCookieJar.load(self.filename)
+
+        handler = HTTPCookieProcessor(self.mozillaCookieJar)
+        return handler
+
+    def save_cookies(self):
+        self.mozillaCookieJar.save()
+
+    def make_cookies(self, response, request):
+        cook = self.mozillaCookieJar.make_cookies(response, request)
+        return cook
+
+    def clear_cookies(self, domain=None, path=None, name=None):
+        self.mozillaCookieJar.clear(domain, path, name)

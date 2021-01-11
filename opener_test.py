@@ -2,8 +2,10 @@ from urlopener import Urlopener, openerconfig
 from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler, CookiejarHandler
 from urlopener.idna import idna_encode
 from urlopener.robots import Robots
+
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
+from http.cookiejar import CookieJar, DefaultCookiePolicy
 
 
 # from urlopener import *
@@ -12,15 +14,16 @@ from http.client import InvalidURL
 if __name__ == '__main__':
 
     urls = (
-        #'https://docs.python.org/3.8/library/tkinter.html',
-        'https://www.dns-shop.ru/robots.txt',
-        'https://www.dns-shop.ru/catalog/17a8e9b716404e77/bytovaya-texnika/',
-        'https://www.dns-shop.ru/catalog/17a890dc16404e77/smartfony-planshety-i-fototexnika/',
+        'https://www.citilink.ru/catalog/computers_and_notebooks/parts/videocards/352141/',
+        'https://www.onlinetrade.ru/catalogue/videokarty-c338/',
+        #'https://www.dns-shop.ru/robots.txt',
+        'https://www.dns-shop.ru/category.xml',
+        'https://www.dns-shop.ru/catalog/212b482fcdc66369/remont-i-dekor/',
+        'https://www.dns-shop.ru/catalog/17a88ba616404e77/avtotovary/',
         'https://bagaznik-darom.ru/',
         'http://www.fish.customweb.ru/robots.txt',
         'http://www.fish.customweb.ru/',
         'http://fish.customweb.ru/',
-        'https://www.dns-shop.ru/robots.txt',
         'http://lanatula.ru/',
         'http://lanatula.ru/admin/',
         'http://www.lanatula.ru/about/',
@@ -29,6 +32,7 @@ if __name__ == '__main__':
         'http://кто.рф/',
         #'https://yandex.ru/search/?text=idna что это&lr=15',
         'https://docs.python.org/3.8/library/tkinter1.html',
+        'https://docs.python.org/3.8/library/tkinter.html',
         'http://www.customweb.ru/images/flags/ad/ad.gif',
         'http://www.customweb.ru/images/flags/ad/metadata.json',
         'http://lana:tula.ru/about1/',
@@ -37,14 +41,19 @@ if __name__ == '__main__':
         'http://demo.customweb.ru/we/wecannot/',
         'http://demo2.customweb.ru/',
         'http://demo20.customweb.ru/',
-        'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/ddd/',
+        #'https://www.dns-shop.ru/product/f30ac0bcc3913330/blok-pitania-sven-350w-pu-350an/ddd/',
         'http://fish.customweb.ru/admin/',
-        'https://юзерагент.рф/',
-        'https://русские-домены.рф/'
+        #'https://юзерагент.рф/',
+        #'https://русские-домены.рф/'
     )
 
     # Создание URL открывалки
     rec = Urlopener()
+
+    rec.add_headers([('Accept', 'text/html'),
+                     ('Connection', 'keep-alive'),
+                     ('Upgrade-Insecure-Requests', '1')
+                     ])
 
     # Базовая идентификация
     auth_handler = AuthorizationHandler()
@@ -58,7 +67,8 @@ if __name__ == '__main__':
 
     # cookies
     if openerconfig.COOKIES:
-        rec.add_cookie_handler()
+        policy = {'rfc2965': True, 'strict_ns_domain': DefaultCookiePolicy.DomainStrict}
+        rec.add_cookie_handler(policy=policy, filename='cookies.txt')
 
     bad_robot = None
 
@@ -114,3 +124,6 @@ if __name__ == '__main__':
 
         response = None
         print('----------')
+
+    if openerconfig.COOKIES:
+        rec.cookie_handler.save_cookies()

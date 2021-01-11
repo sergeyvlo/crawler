@@ -2,7 +2,7 @@ from urllib.request import build_opener, Request
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
 
-from .request_handlers import RedirectHandler, CookiejarHandler
+from .request_handlers import RedirectHandler, CookiejarHandler, MozillaCookiejarHandler
 from urlopener import openerconfig
 
 
@@ -27,15 +27,17 @@ class Urlopener:
         """Метод добавляет обработчик"""
         self.opener.add_handler(handler)
 
-    def add_cookie_handler(self):
+    def add_cookie_handler(self, policy={}, filename='cookies.txt'):
         """Метод добавляет обработчик Cookie"""
-        self.cookie_handler = CookiejarHandler()
-        self.opener.add_handler(self.cookie_handler.cookiejar())
+        self.cookie_handler = MozillaCookiejarHandler(filename)
+        self.opener.add_handler(self.cookie_handler.cookiejar(policy))
 
     def add_headers(self, headers):
+        """Метод добавляет заголовки в запрос"""
         self.opener.addheaders = headers
 
     def urlopen(self, url):
+        """Открывает URL"""
         self.redirect_handler.clear_redirect()
         response = {'response': None, 'redirect': None, 'error': None, 'cookie': None}
 
@@ -58,12 +60,10 @@ class Urlopener:
         except InvalidURL as e:
             response['error'] = {'url': url, 'code': -1, 'msg': str(e)}
 
-        #except CertificateError as e:
-        #    response['error'] = {'url': url, 'code': -1, 'msg': str(e)}
-
         return response
 
     def make_response(self, res, url):
+        """Метод выдает ответ"""
         # Получить кодировку, mimetype, иначе UTF-8
         self.__define_mime_encode(res)
 
@@ -82,10 +82,13 @@ class Urlopener:
         return response, redirect
 
     def __define_mime_encode(self, res):
+        """
+        Метод определяет кодировку страницы.
+        Если не указана кодировка, то используется openerconfig.ENCODING
+        """
         content_type = res.headers['Content-Type'].split(';')
         self.mime_type = content_type[0]
 
-        # Если не указана кодировка, то используется 'UTF-8'
         if len(content_type) > 1:
             self.encoding = content_type[1].split('=')[1]
         else:
