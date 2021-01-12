@@ -34,6 +34,7 @@ COOKIES = True
 """Выбираться будет из базы или ini файла"""
 USE_ROBOTS = False
 USE_SITE_MAP = False
-USER_AGENT = '*'
+USER_AGENT_ROBOTS = '*'
+NAME_SPASE = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
 
 

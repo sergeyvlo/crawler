@@ -26,4 +26,5 @@ MANIFEST
 other/
 .idea/
 cookies.txt
+tmp/
 #.gitignore
