@@ -16,7 +16,7 @@ class XMLload:
         xml_file = urlsplit(self.url)
         xml_file = xml_file.path.split('/')[-1]
         self.xml_file_name = "tmp/" + xml_file.rstrip()
-        
+
         with urlopen(self.url) as remote, open(self.xml_file_name, 'wb') as local:
                 local.write(remote.read())
         print('Загрузка завершена')
