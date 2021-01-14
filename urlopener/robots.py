@@ -28,6 +28,7 @@ class Robots(RobotFileParser):
         """
         Создает сдоварь user-agent: sitemap
         и список.
+        Переделать открытие через Urlopener
         """
         f = urlopen(self.url_base)
         raw = f.read()
@@ -47,6 +48,6 @@ class Robots(RobotFileParser):
                         self.maps[user_agent] = parts[1] + ':' + parts[2]
                         self.maps_list.append(self.maps[user_agent])
 
-        except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError):
+        except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError) as e:
             self.maps = dict()
             self.maps_list = []
