@@ -5,9 +5,9 @@ from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
 
 
-#url_base = "https://bagaznik-darom.ru/"
+url_base = "https://bagaznik-darom.ru/"
 url_base = "http://www.fish.customweb.ru/"
-url_base = "https://www.dns-shop.ru/"
+#url_base = "https://www.dns-shop.ru/"
 #url_base = 'https://www.onlinetrade.ru/'
 #url_base = 'https://юзерагент.рф/'
 #url_base = 'http://lanatula.ru/'
@@ -30,12 +30,17 @@ PARTS = [
 url_base = idna_encode(url_base)
 parser = Robots()
 parser.set_url_ext(url_base)
-parser.site_maps_ext()
+
+try:
+    parser.site_maps_ext()
+except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError) as e:
+    print('Файл robots.txt отсутствует;', e)
+
 print(parser.maps)
 try:
     parser.read()
-except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError):
-    pass
+except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError) as e:
+    print('Файл robots.txt отсутствует;', e)
 
 
 for path in PARTS:

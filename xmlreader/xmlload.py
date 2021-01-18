@@ -11,13 +11,13 @@ class XMLload:
         self.url = url
         self.xml_file_name = None
 
-    def load(self, url=None):
+    def load(self, url=None, dir="tmp/"):
         if url is not None:
             self.url = url
 
         xml_file = urlsplit(self.url)
         xml_file = str(time.time()) + xml_file.path.split('/')[-1]
-        self.xml_file_name = "tmp/" + xml_file.rstrip()
+        self.xml_file_name = dir + xml_file.rstrip()
 
         with urlopen(self.url) as remote, open(self.xml_file_name, 'wb') as local:
                 local.write(remote.read())

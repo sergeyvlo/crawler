@@ -24,30 +24,27 @@ class Robots(RobotFileParser):
         self.url_base = parse.urljoin(self.url_base, 'robots.txt')
         self.set_url(self.url_base)
 
-    def site_maps_ext(self):
+    def site_maps_ext(self, urlopener=None):
         """
         Создает сдоварь user-agent: sitemap
         и список.
-        Переделать открытие через Urlopener
         """
-        f = urlopen(self.url_base)
-        raw = f.read()
+
+        response = urlopen(self.url_base)
+        code = response.getcode()
+        raw = response.read()
+
         user_agent = '*'
 
-        try:
-            self.lines_robots = raw.decode("utf-8").splitlines()
+        self.lines_robots = raw.decode("utf-8").splitlines()
 
-            for line in self.lines_robots:
-                if len(line) > 1:
-                    parts = line.split(':')
-                    parts[0] = parts[0].strip().lower()
-                    parts[1] = parse.unquote(parts[1].strip().lower())
-                    if parts[0] == 'user-agent':
-                        user_agent = parts[1]
-                    if parts[0] == 'sitemap':
-                        self.maps[user_agent] = parts[1] + ':' + parts[2]
-                        self.maps_list.append(self.maps[user_agent])
-
-        except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError) as e:
-            self.maps = dict()
-            self.maps_list = []
+        for line in self.lines_robots:
+            if len(line) > 1:
+                parts = line.split(':')
+                parts[0] = parts[0].strip().lower()
+                parts[1] = parse.unquote(parts[1].strip().lower())
+                if parts[0] == 'user-agent':
+                    user_agent = parts[1]
+                if parts[0] == 'sitemap':
+                    self.maps[user_agent] = parts[1] + ':' + parts[2]
+                    self.maps_list.append(self.maps[user_agent])

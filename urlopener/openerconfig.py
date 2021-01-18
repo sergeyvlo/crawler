@@ -35,6 +35,6 @@ COOKIES = True
 USE_ROBOTS = False
 USE_SITE_MAP = False
 USER_AGENT_ROBOTS = '*'
-NAME_SPASE = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
+#NAME_SPASE = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
 
 

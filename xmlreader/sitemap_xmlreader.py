@@ -17,6 +17,7 @@ class SitemapXML:
         self.url_sitemap_parser = None      # URL sitemap из robots.txt
         self.flag_load = False              # Чтобы повторно не загружать XML sitemap
         self.xml_is_load = True
+        self.xml_ns = None
 
     def sitemap_load(self, url_xml_sitemap):
         """Загружает на диск файл XML sitemap"""
@@ -26,13 +27,14 @@ class SitemapXML:
     def make_sitemap_url(self):
         """Формирует список URL-ов файлов XML sitemap"""
         data = iterparse(self.sitemap_xml, ['start', 'end'])
+        self._xml_namespace()
 
         for (event, node) in data:
-            node_name = node.tag.split(openerconfig.NAME_SPASE)[1]
-            if node_name == 'sitemap' and event == 'start':
+            node_name = node.tag.split(self.xml_ns)[1]
+            if node_name == 'sitemap' and event == 'end':
 
                 # Загрузить URL файлов sitemaps
-                record = XMLRecord(node, openerconfig.NAME_SPASE)
+                record = XMLRecord(node, self.xml_ns)
                 try:
                     self.url_sitemap.append(record.loc)
                 except AttributeError:
@@ -47,7 +49,7 @@ class SitemapXML:
             p = Path(self.sitemap_xml)
             p.unlink()
 
-    def extract_url_from_sitemap(self, urlopener):
+    def extract_url_from_sitemap(self):
         for url in self.url_sitemap:
             # Не загружать повторно sitemap.xml, если он один
             if self.flag_load:
@@ -55,29 +57,30 @@ class SitemapXML:
 
             if self.xml_is_load:
                 data = iterparse(self.sitemap_xml, ['start', 'end'])
+                self._xml_namespace()
                 for (event, node) in data:
-                    node_name = node.tag.split(openerconfig.NAME_SPASE)[1]
-                    if node_name == 'url' and event == 'start':
+                    node_name = node.tag.split(self.xml_ns)[1]
+                    if node_name == 'url' and event == 'end':
+                        record = XMLRecord(node, self.xml_ns)
 
-                        record = XMLRecord(node, openerconfig.NAME_SPASE)
                         try:
-                            #print(record.loc)
-                            response = urlopener.urlopen(record.loc)
-                            if response['redirect'] is not None:
-                                print(response['redirect'])
-
-                            if response['response'] is not None:
-                                print(response['response']['code'], response['response']['url'],
-                                      response['response']['msg'])
-
-                            if response['error'] is not None:
-                                print(response['error'])
+                            yield record.loc
                         except AttributeError:
                             print('Нет атрибута: record.loc')
 
                 # Удалить XML файл
                 p = Path(self.sitemap_xml)
                 p.unlink()
+
+    def _xml_namespace(self):
+        """Получить namespase"""
+        ns = []
+        data = iterparse(self.sitemap_xml, ['start-ns', 'end-ns'])
+        for (event, node) in data:
+            if event == 'start-ns':
+                ns.append(node[1])
+                continue
+        self.xml_ns = '{' + ns[0] + '}'
 
     def xml_load(self, url):
         """Физически загружает файл на диск"""
