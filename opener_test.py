@@ -2,6 +2,7 @@ from urlopener import Urlopener, openerconfig
 from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler, CookiejarHandler
 from urlopener.idna import idna_encode
 from urlopener.robots import Robots
+from urlopener.make_response import MakeResponse
 
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
@@ -16,7 +17,7 @@ if __name__ == '__main__':
     urls = (
         'https://www.citilink.ru/catalog/computers_and_notebooks/parts/videocards/352141/',
         'https://www.onlinetrade.ru/catalogue/videokarty-c338/',
-        #'https://www.dns-shop.ru/robots.txt',
+        'https://www.dns-shop.ru/robots.txt',
         'https://www.dns-shop.ru/category.xml',
         'https://www.dns-shop.ru/catalog/212b482fcdc66369/remont-i-dekor/',
         'https://www.dns-shop.ru/catalog/17a88ba616404e77/avtotovary/',
@@ -47,9 +48,13 @@ if __name__ == '__main__':
         #'https://русские-домены.рф/'
     )
 
+    #response = {'response': None, 'redirect': None, 'error': None, 'cookie': None}
+
     # Создание URL открывалки
     rec = Urlopener()
+    make_response = MakeResponse()
 
+    # Добавить заголовки запроса
     rec.add_headers([('Accept', 'text/html'),
                      ('Connection', 'keep-alive'),
                      ('Upgrade-Insecure-Requests', '1')
@@ -73,6 +78,11 @@ if __name__ == '__main__':
     bad_robot = None
 
     for url in urls:
+        response = None
+        redirect = None
+        error = None
+        cookie = None
+
         # Для открытия международных доменов
         url = idna_encode(url)
 
@@ -90,39 +100,48 @@ if __name__ == '__main__':
 
         # Проверка доступа к URL в robots.txt
         if openerconfig.USE_ROBOTS:
-            flag_url = parser.can_fetch(openerconfig.USER_AGENT, url)
+            flag_url = parser.can_fetch(openerconfig.USER_AGENT_ROBOTS, url)
         else:
             flag_url = True
 
         if flag_url:
-            response = rec.urlopen(url)     # Открыть URL
+            try:
+                rec.urlopen(url)     # Открыть URL
+                response = make_response.make_response(rec.response, url)
+                redirect = make_response.make_redirect(rec.redirect_handler )
+
+                if openerconfig.COOKIES:
+                    cookie = make_response.make_cookies(rec.cookie_handler,rec.response, rec.request)
+            except HTTPError as e:
+                error = make_response.make_error(url, e.code, str(e))
+
+            except URLError as e:  # Ошибки URL
+                error = make_response.make_error(url, e.errno, e.reason)
+
+            except InvalidURL as e:
+                error = make_response.make_error(url, -1, str(e))
         else:
             bad_robot = ('URL закрыт', url)
 
-        if openerconfig.COOKIES:
-            #print(rec.cookie_handler.make_cookies(response, rec))
-            pass
 
         if openerconfig.COOKIES:
-            print(response['cookie'])
+            print(cookie)
 
         #print(response)
 
-        if response['redirect'] is not None:
-            print(response['redirect'])
+        if redirect is not None:
+            print(redirect)
 
-        if response['response'] is not None:
-            print(response['response']['code'], response['response']['url'], response['response']['msg'])
+        if response is not None:
+            print(response['code'], response['url'], response['msg'])
 
-        if response['error'] is not None:
-            print(response['error'])
+        if error is not None:
+            print(error)
 
         if bad_robot is not None:
             print(bad_robot)
             bad_robot = None
 
-
-        response = None
         print('----------')
 
     if openerconfig.COOKIES:

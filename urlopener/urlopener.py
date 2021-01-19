@@ -8,20 +8,20 @@ from urlopener import openerconfig
 
 class Urlopener:
 
-    def __init__(self, encoding=openerconfig.ENCODING, timeout=None):
+    def __init__(self, timeout=None):
         self.timeout = timeout
-        self.encoding = encoding
+        # Ответ
+        self.response = None
+        # Запрос
+        self.request = None
 
-        self.mime_type = None
-        self.res = None
-
+        # Обработчик редиректов
         self.redirect_handler = RedirectHandler()
+        # Обработчик cookie файлов
         self.cookie_handler = None
 
         # Создать открывалку
         self.opener = build_opener(self.redirect_handler)
-
-        # self.opener.add_handler(self.redirect_handler)
 
     def add_handler(self, handler):
         """Метод добавляет обработчик"""
@@ -38,58 +38,8 @@ class Urlopener:
 
     def urlopen(self, url):
         """Открывает URL"""
-        self.redirect_handler.clear_redirect()
-        response = {'response': None, 'redirect': None, 'error': None, 'cookie': None}
-
-        req = Request(url)
-
-        try:
-            self.res = self.opener.open(req, timeout=self.timeout)
-            response['response'], response['redirect'] = self.make_response(self.res, url)
-            if self.cookie_handler is not None:
-                response['cookie'] = self.cookie_handler.make_cookies(self.res, req)
-
-        except HTTPError as e:
-            response['error'] = {'url': url, 'code': e.code, 'msg': str(e)}
-            #if self.res is not None:
-            #    r, response['redirect'] = self.make_response(self.res, url)
-
-        except URLError as e:  # Ошибки URL
-            response['error'] = {'url': url, 'code': e.errno, 'msg': e.reason}
-
-        except InvalidURL as e:
-            response['error'] = {'url': url, 'code': -1, 'msg': str(e)}
-
-        return response
-
-    def make_response(self, res, url):
-        """Метод выдает ответ"""
-        # Получить кодировку, mimetype, иначе UTF-8
-        self.__define_mime_encode(res)
-
-        if self.mime_type in openerconfig.MIME_TYPES:
-            data = res.read().decode(self.encoding)
-        else:
-            data = None
-
-        response = {'url': url, 'headers': res.headers, 'code': res.getcode(),
-                    'msg': res.msg, 'new_url': res.geturl(), 'data': data}
-
-        redirect = self.redirect_handler.get_redirect()
-
+        # Очистить предыдущие редиректы
         self.redirect_handler.clear_redirect()
 
-        return response, redirect
-
-    def __define_mime_encode(self, res):
-        """
-        Метод определяет кодировку страницы.
-        Если не указана кодировка, то используется openerconfig.ENCODING
-        """
-        content_type = res.headers['Content-Type'].split(';')
-        self.mime_type = content_type[0]
-
-        if len(content_type) > 1:
-            self.encoding = content_type[1].split('=')[1]
-        else:
-            self.encoding = openerconfig.ENCODING
+        self.request = Request(url)
+        self.response = self.opener.open(self.request, timeout=self.timeout)
