@@ -6,8 +6,6 @@
 from urllib.robotparser import RobotFileParser
 from urllib.request import urlopen
 from urllib import parse
-from urllib.error import URLError, HTTPError
-from http.client import InvalidURL
 
 from .utils import get_base_url
 
@@ -15,28 +13,24 @@ class Robots(RobotFileParser):
 
     def __init__(self):
         RobotFileParser.__init__(self)
+        self.url_robots = None
         self.maps = dict()
         self.maps_list = []
         self.lines_robots = None
 
     def set_url_ext(self, url_base):
-        self.url_base = get_base_url(url_base)
-        self.url_base = parse.urljoin(self.url_base, 'robots.txt')
-        self.set_url(self.url_base)
+        self.url_robots = get_base_url(url_base)
+        self.url_robots = parse.urljoin(self.url_robots, 'robots.txt')
+        self.set_url(self.url_robots)
 
-    def site_maps_ext(self, urlopener=None):
+    def site_maps_ext(self, raw):
         """
         Создает сдоварь user-agent: sitemap
         и список.
         """
-
-        response = urlopen(self.url_base)
-        code = response.getcode()
-        raw = response.read()
-
         user_agent = '*'
 
-        self.lines_robots = raw.decode("utf-8").splitlines()
+        self.lines_robots = raw.splitlines()
 
         for line in self.lines_robots:
             if len(line) > 1:

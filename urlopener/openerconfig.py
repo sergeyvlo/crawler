@@ -21,7 +21,7 @@ ENCODING = 'UTF-8'
 # Прокси сервер
 
 # MIME типы, для которых сохраняются текстовые данные
-MIME_TYPES = ('text/html', 'text/plain', 'application/json')
+MIME_TYPES = ('text/html', 'text/plain', 'application/json', 'application/xml')
 
 # Базовая Идентификация
 BASIC_AUTH = (('http://demo.customweb.ru/', 'admin', '12345'),

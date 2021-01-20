@@ -31,11 +31,6 @@ url_base = idna_encode(url_base)
 parser = Robots()
 parser.set_url_ext(url_base)
 
-try:
-    parser.site_maps_ext()
-except (UnicodeDecodeError, URLError, HTTPError, InvalidURL, ValueError) as e:
-    print('Файл robots.txt отсутствует;', e)
-
 print(parser.maps)
 try:
     parser.read()

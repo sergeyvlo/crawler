@@ -1,12 +1,12 @@
 from urlopener import Urlopener, openerconfig
-from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler, CookiejarHandler
+from urlopener.request_handlers import AuthorizationHandler, UserAgentHandler
 from urlopener.idna import idna_encode
 from urlopener.robots import Robots
 from urlopener.make_response import MakeResponse
 
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
-from http.cookiejar import CookieJar, DefaultCookiePolicy
+from http.cookiejar import DefaultCookiePolicy
 
 
 # from urlopener import *

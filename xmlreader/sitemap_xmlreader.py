@@ -11,13 +11,14 @@ from urlopener import openerconfig
 
 class SitemapXML:
 
-    def __init__(self):
+    def __init__(self, urlopener):
         self.sitemap_xml = None
         self.url_sitemap = []
         self.url_sitemap_parser = None      # URL sitemap из robots.txt
         self.flag_load = False              # Чтобы повторно не загружать XML sitemap
         self.xml_is_load = True
         self.xml_ns = None
+        self.load_xml_file = XMLload(urlopener)     # Загружает XML файл на диск
 
     def sitemap_load(self, url_xml_sitemap):
         """Загружает на диск файл XML sitemap"""
@@ -45,9 +46,9 @@ class SitemapXML:
                 self.url_sitemap.append(self.url_sitemap_parser)
                 continue
 
+        # Удалить XML файл
         if self.flag_load:
-            p = Path(self.sitemap_xml)
-            p.unlink()
+            self.load_xml_file.unlink()
 
     def extract_url_from_sitemap(self):
         for url in self.url_sitemap:
@@ -62,15 +63,23 @@ class SitemapXML:
                     node_name = node.tag.split(self.xml_ns)[1]
                     if node_name == 'url' and event == 'end':
                         record = XMLRecord(node, self.xml_ns)
-
                         try:
                             yield record.loc
                         except AttributeError:
                             print('Нет атрибута: record.loc')
 
                 # Удалить XML файл
-                p = Path(self.sitemap_xml)
-                p.unlink()
+                self.load_xml_file.unlink()
+
+    def xml_load(self, url):
+        """Физически загружает файл на диск"""
+        try:
+            self.load_xml_file.load(url)
+        except (URLError, HTTPError, InvalidURL) as e:
+            print('Невозможно загрузить файл:', url, e)
+            self.xml_is_load = False
+
+        self.sitemap_xml = self.load_xml_file.xml_file_name
 
     def _xml_namespace(self):
         """Получить namespase"""
@@ -81,15 +90,3 @@ class SitemapXML:
                 ns.append(node[1])
                 continue
         self.xml_ns = '{' + ns[0] + '}'
-
-    def xml_load(self, url):
-        """Физически загружает файл на диск"""
-        xml_file = XMLload()
-
-        try:
-            xml_file.load(url)
-        except (URLError, HTTPError, InvalidURL) as e:
-            print('Невозможно загрузить файл:', url, e)
-            self.xml_is_load = False
-
-        self.sitemap_xml = xml_file.xml_file_name

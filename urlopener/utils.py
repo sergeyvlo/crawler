@@ -13,7 +13,6 @@ def get_base_url(url):
 
 
 import reprlib
-
 reprlib.Repr.maxlong = 80
 
 
@@ -37,3 +36,15 @@ class ListInstance:
         for super in self.__class__.__bases__:
             names.append(super.__name__)
             return ', '.join(names)
+
+
+def print_response(response):
+    if response['redirect'] is not None:
+        print(response['redirect'])
+        response['redirect'] = None
+    if response['response'] is not None:
+        print(response['response']['code'], response['response']['url'], response['response']['msg'])
+        response['response'] = None
+    if response['error'] is not None:
+        print(response['error'])
+        response['error'] = None
