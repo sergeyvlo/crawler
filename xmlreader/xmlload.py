@@ -21,8 +21,8 @@ class XMLload:
 
         self.urlopener.urlopen(self.url)
 
-        with open(self.xml_file_name, 'wb') as local:
-            local.write(self.urlopener.response.read())
+        with open(self.xml_file_name, 'w') as local:
+            local.write(self.urlopener.response.read().decode('UTF-8'))
 
     def unlink(self):
         p = Path(self.xml_file_name)

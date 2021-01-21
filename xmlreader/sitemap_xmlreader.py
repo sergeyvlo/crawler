@@ -12,18 +12,12 @@ from urlopener import openerconfig
 class SitemapXML:
 
     def __init__(self, urlopener):
-        self.sitemap_xml = None
-        self.url_sitemap = []
-        self.url_sitemap_parser = None      # URL sitemap из robots.txt
+        self.sitemap_xml = None             # Имя XML файла
+        self.url_sitemap = []               # Срисок url файлов XML sitemap
         self.flag_load = False              # Чтобы повторно не загружать XML sitemap
-        self.xml_is_load = True
-        self.xml_ns = None
+        self.xml_is_load = True             # Загружен XML файл
+        self.xml_ns = None                  # namespase XML
         self.load_xml_file = XMLload(urlopener)     # Загружает XML файл на диск
-
-    def sitemap_load(self, url_xml_sitemap):
-        """Загружает на диск файл XML sitemap"""
-        self.url_sitemap_parser = url_xml_sitemap
-        self.xml_load(self.url_sitemap_parser)
 
     def make_sitemap_url(self):
         """Формирует список URL-ов файлов XML sitemap"""
@@ -43,7 +37,7 @@ class SitemapXML:
                 self.flag_load = True   # Разрешить загружать xml файлы sitemap
 
             elif node_name == 'urlset' and event == 'start':
-                self.url_sitemap.append(self.url_sitemap_parser)
+                self.url_sitemap.append(self.sitemap_xml)
                 continue
 
         # Удалить XML файл

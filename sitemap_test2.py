@@ -43,33 +43,29 @@ parser = Robots()
 url_base = idna_encode(url_base)
 parser.set_url_ext(url_base)
 
-response = None
-redirect = None
-code = 0
-error_exc = None
+counter = collections.Counter()
+
 try:
     rec.urlopen(parser.url_robots)  # Открыть URL
     response = make_response.make_response(rec.response, parser.url_robots)
     redirect = make_response.make_redirect(rec.redirect_handler)
+
+    # Файл robots.txt загружен
     if redirect is None:
-        code = response['code']
-    else:
-        code = 0
-except (HTTPError, URLError, InvalidURL) as e:
-    error_exc = str(e)
-    code = 0
-
-counter = collections.Counter()
-if  code == 200:
-    parser.site_maps_ext(response['data'])
-
-    try:
+        parser.site_maps_ext(response['data'])
         sitemap_xml = SitemapXML(rec)
         url_xml_sitemap = parser.maps[openerconfig.USER_AGENT_ROBOTS]
-        sitemap_xml.sitemap_load(url_xml_sitemap)
 
+        # Загрузить sitemap.xml
+        #sitemap_xml.sitemap_load(url_xml_sitemap)
+        sitemap_xml.xml_load(url_xml_sitemap)
+
+        # Удалось загрузить sitemap.xml
         if sitemap_xml.xml_is_load:
+            #Формирует список URL-ов файлов XML sitemap
             sitemap_xml.make_sitemap_url()
+
+            # Обход файла/файлов xml с картой сайта
             for url in sitemap_xml.extract_url_from_sitemap():
                 response = {'response': None, 'redirect': None, 'error': None}
                 counter['url'] += 1
@@ -90,7 +86,10 @@ if  code == 200:
                 print_response(response)
 
                 print(counter['url'])
-    except KeyError:
+    else:
+        print('Файл robots.txt не найден:', parser.url_robots, redirect[0]['code'], redirect[0]['msg'])
+
+except (HTTPError, URLError, InvalidURL) as e:
+    print('Файл robots.txt не найден:', parser.url_robots, str(e))
+except KeyError:
         print('Такого робота в robots.txt нет.\nУкажите User-agent')
-else:
-    print('Файл robots.txt не найден:', parser.url_robots, error_exc)
