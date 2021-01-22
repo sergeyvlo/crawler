@@ -1,7 +1,6 @@
 from xml.etree.ElementTree import iterparse
 from urllib.error import URLError, HTTPError
 from http.client import InvalidURL
-from pathlib import Path
 
 from .xmlload import XMLload
 from .xmlrecord import XMLRecord

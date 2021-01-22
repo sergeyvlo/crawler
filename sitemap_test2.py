@@ -7,7 +7,7 @@ from urlopener import Urlopener, openerconfig, MakeResponse
 from urlopener.request_handlers import UserAgentHandler
 from urlopener.idna import idna_encode
 
-from xmlreader import SitemapXML
+from sitemapxml import SitemapXML
 from urlopener.robots import Robots
 import collections
 from urlopener.utils import print_response

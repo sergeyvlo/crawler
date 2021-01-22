@@ -1,6 +1,4 @@
 from urllib.request import build_opener, Request
-from urllib.error import URLError, HTTPError
-from http.client import InvalidURL
 
 from .request_handlers import RedirectHandler, CookiejarHandler, MozillaCookiejarHandler
 from urlopener import openerconfig
